@@ -4,12 +4,13 @@
 #include <vector>
 #include <deque>
 #include <queue>
+#include <stack>
 #include <map>
 #include <unordered_map>
 
 struct node
 {
-	int data;
+	char data;
 	node* left;
 	node* right;
 
@@ -45,37 +46,68 @@ node* build_tree()
 
 }
 
+int findpair(int begin, int end, char*& A)
+{
+	int delta = 1;
+	
+
+	int t = begin+1;
+	while(t != end)
+	{
+		if (A[t] == '('){
+			delta++;
+		}
+		if(A[t] == ')'){
+			delta--;
+		}
+		if (delta == 0) break;
+
+		t++;
+	}
+	return t;
+}
+
+    // this is not the g4g sum tree, but a weird one where
+	// each node's data is it's l's data and r's data's sum
+    void toSumTree(Node *root)
+    {
+          
+        if (root != NULL)
+        {
+            if (root->left) toSumTree(root->left);
+            if (root->right) toSumTree(root->right);
+    
+            if (root->left and root->right)
+            {
+                root->data = root->left->data + root->right->data;
+            } 
+            else if (root->left and !root->right)
+            {
+                root->data = root->left->data;
+            }
+            else if (!root->left and root->right)
+            {
+                root->data = root->right->data;
+            }
+            else // leaf node, store its address so we can later make it 0
+            {
+                root->data = root->data;
+            }
+        }
+        else return;
+        
+
+          
+
+        
+    }
+
 int main() 
 {
-	node* root = new node(2);
+	char A[] = "4(2(3)(1))(6(5))";
+	node* R = nullptr;
 	
-	root->left = new node(1);
-	root->right = new node(10);
-	
-	root->right->left = new node(3);
-
-	root->right->left->right = new node(6);
-
-	root->right->left->right->left = new node(4);
-	root->right->left->right->right = new node(9);
-
-	root->right->left->right->left->right = new node(5);
-
-
-	//preorder(root);
-	
-	root = build_tree();
-	root = new node(5);
-	root->left = new node(4);
-	root->right = new node(9);
-	root->left->left = new node(8);
-	std::vector<int> ans; // stores the level by level OT
-	ans  = levelorder(root);
-	//std::unordered_map<node*, int> nodewidth = levelorder(root, ans);
-
-	std::copy(ans.begin(), ans.end(), std::ostream_iterator<int>(std::cout, " "));
-	
-
+	CT(0, 15, R, A);
 	
   
 } 

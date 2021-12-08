@@ -1,0 +1,13 @@
+F(start, finish, A[], root):
+	if (start > finish) return;
+	if (start == finish) root = new node(start); return;
+
+	// eg: 4(2(3)(1))(6(5)), *s = 4, *f = the last )
+	e1 = find_end_of_pair1(start, finish, A[]) // pair of ()
+	root = new node(start)
+	
+	pair1 = (s+1, e1);
+	pair2 = (e1+1, f); // s is start and f is finish
+	
+	F(pair1.first + 1, pair1.second - 1, root->left);
+	F(pair2.first + 1, pair2.second - 1, root->right);	

@@ -10,7 +10,7 @@
 
 struct node
 {
-	char data;
+	int data;
 	node* left;
 	node* right;
 
@@ -31,12 +31,17 @@ node* build_tree()
 	root->left->left = new node(4);
 	root->left->right = new node(5);
 	root->right->left = new node(6);
-	root->right->right = new node(7);
+	root->right->right = new node(30);
 
-	root->left->left->left = new node(8);
-	root->left->left->right = new node(9);
-	root->left->right->left = new node(10);
-	root->left->right->right = new node(11);
+	
+	
+	// root->left->left->left = new node(8);
+	// root->left->left->right = new node(9);
+	// root->left->right->left = new node(10);
+	// root->left->right->right = new node(11);
+
+	root->right->left->left = new node(20);
+
 
 
 	return root; 
@@ -69,48 +74,163 @@ int findpair(int begin, int end, char*& A)
 
     // this is not the g4g sum tree, but a weird one where
 	// each node's data is it's l's data and r's data's sum
-    void toSumTree(Node *root)
-    {
-          
-        if (root != NULL)
-        {
-            if (root->left) toSumTree(root->left);
-            if (root->right) toSumTree(root->right);
-    
-            if (root->left and root->right)
-            {
-                root->data = root->left->data + root->right->data;
-            } 
-            else if (root->left and !root->right)
-            {
-                root->data = root->left->data;
-            }
-            else if (!root->left and root->right)
-            {
-                root->data = root->right->data;
-            }
-            else // leaf node, store its address so we can later make it 0
-            {
-                root->data = root->data;
-            }
-        }
-        else return;
-        
+void toSumTree(node *root)
+{
+		
+	if (root != NULL)
+	{
+		if (root->left) toSumTree(root->left);
+		if (root->right) toSumTree(root->right);
 
-          
+		if (root->left and root->right)
+		{
+			root->data = root->left->data + root->right->data;
+		} 
+		else if (root->left and !root->right)
+		{
+			root->data = root->left->data;
+		}
+		else if (!root->left and root->right)
+		{
+			root->data = root->right->data;
+		}
+		else // leaf node, store its address so we can later make it 0
+		{
+			root->data = root->data;
+		}
+	}
+	else return;
+	
 
-        
-    }
+		
+
+	
+}
+
+
+
+// bloodline sums max
+// mls = maximum level seen
+// map from level->bloodline sum
+void P(node* root, int BS, int level, std::unordered_map<int, int>& map, int& mls, int& maxBS);
 
 int main() 
 {
-	char A[] = "4(2(3)(1))(6(5))";
-	node* R = nullptr;
-	
-	CT(0, 15, R, A);
+
+
+	node* root  = build_tree();
+	std::unordered_map<int, int> map;
+	int mls = 0;
+	int maxBS = 0;
+	P(root, 0, 1, map, mls, maxBS);
 	
   
 } 
+
+bool leaf(node* root)
+{
+	return (!root->left and !root->right)? true : false;
+}
+
+// bloodline sums max
+// mls = maximum level seen
+// map from level->bloodline sum
+void P(node* root, int BS, int level, std::unordered_map<int, int>& map, int& mls, int& maxBS)
+{
+	if (root == nullptr) { return; }
+
+	// work
+	if (leaf(root))
+	{
+		if (map.find(level) == map.end()){ // if map[level] is empty
+			map[level] = BS;
+		} 
+		else if (map[level] < BS){
+			map[level] = BS;
+		}
+
+		// cases: level == mls && BS + root->data > maxBS, level > mls
+		
+		if (level >= mls && BS+root->data > maxBS) {
+			//std::cout << " BS  = " << BS + root->data << " level = " << level << std::endl;
+			mls =level;
+			maxBS = BS+root->data;
+		} 
+	}
+
+	// calls
+	if (root->left){
+		P(root->left, BS + root->data, level+1, map, mls, maxBS);
+	}
+	if (root->right){
+		P(root->right, BS + root->data, level+1, map, mls, maxBS);
+	}
+
+	std::cout << "\n max BS = " << maxBS << std::endl;
+
+}
+	 
+//
+
+
+
+void preorder(node* root)
+{
+	if (root != nullptr){
+		std::cout << root->data << ", ";
+		preorder(root->left);
+		preorder(root->right);
+	}
+}
+
+// leaves at the same level?
+// doesnt work
+// void LSL(node* root)
+// {
+// 	static int l = 1;
+// 	if (root == nullptr) { l--; return; }
+
+// 	l++; LSL(root->left);
+// 	l++; LSL(root->left);
+// 	std::cout << root->data << " - level " << l << std::endl;
+	
+// 	l--; return;
+// }
+
+// tells us if all the leaves are at the same level or not
+bool PO(node* root, int level)
+{
+	static bool balanced = true;
+	if (root == nullptr) { return true; }
+
+	PO(root->left, level+1);
+	PO(root->right, level+1);
+
+	// visit the actual node
+	// if this is a leaf, ie r->l and r->r are null, then collect its level
+	//std::cout << root->data << " - level " << level << std::endl;
+
+	if (!root->left and !root->right){ // if leaf
+		static int leaflev = level; // leaflev is the level of the 1st leaf we meet 
+		
+		if (leaflev != level) 
+		{ 
+			std::cout << "NOT EQUAL at " << root->data << std::endl; 
+			balanced = false;   
+		}
+	}
+
+	return balanced; // if all that is done and we dont return false, 
+	// it means that we did not encounter a level that WASNT equal to leaflev
+}
+
+
+// bloodline sums max
+// mls = maximum level seen
+// map from level->bloodline sum
+void P(node* root, int BS, int level, std::unordered_map<int, int>& map, int& mls, int& maxBS);
+
+
 
 std::vector<int> topview(node* root)
 {
@@ -168,14 +288,7 @@ std::vector<int> topview(node* root)
 
 }
 
-void preorder(node* root)
-{
-	if (root != nullptr){
-		std::cout << root->data << ", ";
-		preorder(root->left);
-		preorder(root->right);
-	}
-}
+
 
 // prints only
 std::vector<int> levelorder_zigzag(node* root)

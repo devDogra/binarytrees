@@ -16,10 +16,8 @@ struct node
 
 	node(int d) { data = d; left = nullptr; right = nullptr;}
 };
-std::vector<int> topview(node* root);
 
-void preorder(node* root);
-std::vector<int> levelorder(node* root);
+
 
 node* build_tree()
 {
@@ -35,10 +33,10 @@ node* build_tree()
 
 	
 	
-	// root->left->left->left = new node(8);
-	// root->left->left->right = new node(9);
-	// root->left->right->left = new node(10);
-	// root->left->right->right = new node(11);
+	root->left->left->left = new node(8);
+	root->left->left->right = new node(9);
+	root->left->right->left = new node(10);
+	root->left->right->right = new node(11);
 
 	root->right->left->left = new node(20);
 
@@ -51,78 +49,68 @@ node* build_tree()
 
 }
 
-int findpair(int begin, int end, char*& A)
+
+
+
+
+
+// common ancestors
+void F2(node* root, int n1, int n2, bool f1, bool f2, std::vector<int>& v1, std::vector<int>& v2, std::vector<int>& visit_history)
 {
-	int delta = 1;
-	
+	if (root == nullptr) { return; }	
 
-	int t = begin+1;
-	while(t != end)
-	{
-		if (A[t] == '('){
-			delta++;
-		}
-		if(A[t] == ')'){
-			delta--;
-		}
-		if (delta == 0) break;
+	// add root to the visit history of this particular branch of the call tree
+	visit_history.push_back(root->data);
 
-		t++;
+	if (root->data == n1){
+		f1 = true;
 	}
-	return t;
-}
 
-    // this is not the g4g sum tree, but a weird one where
-	// each node's data is it's l's data and r's data's sum
-void toSumTree(node *root)
-{
-		
-	if (root != NULL)
-	{
-		if (root->left) toSumTree(root->left);
-		if (root->right) toSumTree(root->right);
-
-		if (root->left and root->right)
-		{
-			root->data = root->left->data + root->right->data;
-		} 
-		else if (root->left and !root->right)
-		{
-			root->data = root->left->data;
-		}
-		else if (!root->left and root->right)
-		{
-			root->data = root->right->data;
-		}
-		else // leaf node, store its address so we can later make it 0
-		{
-			root->data = root->data;
-		}
+	if (root->data == n2){
+		f2 = true;
 	}
-	else return;
-	
 
-		
+	if (f1){
+		v1 = visit_history;
+	}
 
-	
+	if (f2){
+		v2 = visit_history;
+	}
+
+
+
+		// calls
+	if (root->left) {
+		F2(root->left, n1, n2, f1, f2, v1, v2, visit_history);  
+	}
+	if (root->right) {
+		F2(root->right, n1, n2, f1, f2, v1, v2, visit_history);
+	}
+
+	visit_history.pop_back();
+	return;
 }
 
 
+void F2(node* root, int n1, int n2, bool f1, bool f2, std::vector<int>& v1, std::vector<int>& v2, std::vector<int>& visit_history);
 
-// bloodline sums max
-// mls = maximum level seen
-// map from level->bloodline sum
-void P(node* root, int BS, int level, std::unordered_map<int, int>& map, int& mls, int& maxBS);
 
 int main() 
 {
 
 
 	node* root  = build_tree();
-	std::unordered_map<int, int> map;
-	int mls = 0;
-	int maxBS = 0;
-	P(root, 0, 1, map, mls, maxBS);
+	std::vector<int> v1;
+	std::vector<int> v2;
+	std::vector<int> visit_history;
+	int n1 = 10;
+	int n2 = 6;
+	bool f1 = false;
+	bool f2 = false;
+
+	F2(root, n1, n2, f1, f2, v1, v2, visit_history);
+
 	
   
 } 
